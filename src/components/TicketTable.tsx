@@ -1,13 +1,16 @@
 
 import React, { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Info, Smartphone, Battery, MapPin, CheckCircle } from 'lucide-react';
+import { Info, Smartphone, Battery, MapPin, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Tooltip,
   TooltipContent,
@@ -53,24 +56,31 @@ const DeviceStatusBadge: React.FC<{ status?: string }> = ({ status }) => {
 };
 
 const DeviceDisplay: React.FC<{devices: Device[]}> = ({ devices }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
   // Calculate total number of devices
   const totalDevices = devices.reduce((total, device) => {
     return total + (device.count ? device.count : 1);
   }, 0);
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <div className="flex items-center cursor-pointer hover:bg-gray-100 px-2 py-1 rounded">
-          <Smartphone className="h-4 w-4 mr-1 text-gray-500" />
-          <span className="text-sm font-medium">{totalDevices} {totalDevices === 1 ? 'Device' : 'Devices'}</span>
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-96 p-4">
-        <h3 className="font-medium mb-3">Device Details</h3>
-        <div className="space-y-3">
+    <div>
+      <div 
+        onClick={() => setIsExpanded(!isExpanded)} 
+        className="flex items-center cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
+      >
+        <Smartphone className="h-4 w-4 mr-1 text-gray-500" />
+        <span className="text-sm font-medium">{totalDevices} {totalDevices === 1 ? 'Device' : 'Devices'}</span>
+        {isExpanded ? 
+          <ChevronUp className="h-4 w-4 ml-1 text-gray-500" /> : 
+          <ChevronDown className="h-4 w-4 ml-1 text-gray-500" />
+        }
+      </div>
+      
+      {isExpanded && (
+        <div className="mt-2 space-y-2">
           {devices.map((device, idx) => (
-            <div key={idx} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <div key={idx} className="bg-gray-50 rounded-lg p-3 border border-gray-100 ml-4">
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center">
                   <Badge variant="outline" className="bg-gray-100 text-gray-700 rounded-full px-2 py-1 text-xs">
@@ -120,8 +130,8 @@ const DeviceDisplay: React.FC<{devices: Device[]}> = ({ devices }) => {
             </div>
           ))}
         </div>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   );
 };
 
