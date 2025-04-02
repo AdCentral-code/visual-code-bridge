@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Info, Smartphone, Battery, MapPin, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Info, Smartphone } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -11,11 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger
-} from '@/components/ui/tooltip';
+import DeviceDetailsDrawer from './DeviceDetailsDrawer';
 
 interface Device {
   name: string;
@@ -36,27 +31,8 @@ interface TicketData {
   amount: string;
 }
 
-const DeviceStatusBadge: React.FC<{ status?: string }> = ({ status }) => {
-  if (!status) return null;
-  
-  const statusColors = {
-    'pending': 'bg-yellow-100 text-yellow-700',
-    'in-progress': 'bg-blue-100 text-blue-700',
-    'completed': 'bg-green-100 text-green-700',
-    'waiting': 'bg-gray-100 text-gray-700'
-  };
-  
-  const color = statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-700';
-  
-  return (
-    <Badge variant="outline" className={`${color} rounded-full px-2 py-0.5 text-xs font-medium`}>
-      {status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ')}
-    </Badge>
-  );
-};
-
 const DeviceDisplay: React.FC<{devices: Device[]}> = ({ devices }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   // Calculate total number of devices
   const totalDevices = devices.reduce((total, device) => {
@@ -64,74 +40,21 @@ const DeviceDisplay: React.FC<{devices: Device[]}> = ({ devices }) => {
   }, 0);
 
   return (
-    <div>
+    <>
       <div 
-        onClick={() => setIsExpanded(!isExpanded)} 
+        onClick={() => setIsDrawerOpen(true)} 
         className="flex items-center cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
       >
         <Smartphone className="h-4 w-4 mr-1 text-gray-500" />
         <span className="text-sm font-medium">{totalDevices} {totalDevices === 1 ? 'Device' : 'Devices'}</span>
-        {isExpanded ? 
-          <ChevronUp className="h-4 w-4 ml-1 text-gray-500" /> : 
-          <ChevronDown className="h-4 w-4 ml-1 text-gray-500" />
-        }
       </div>
       
-      {isExpanded && (
-        <div className="mt-2 space-y-2">
-          {devices.map((device, idx) => (
-            <div key={idx} className="bg-gray-50 rounded-lg p-3 border border-gray-100 ml-4">
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex items-center">
-                  <Badge variant="outline" className="bg-gray-100 text-gray-700 rounded-full px-2 py-1 text-xs">
-                    {device.brand || 'Unknown'} {device.name}
-                  </Badge>
-                  {device.count && <span className="text-xs bg-gray-200 px-2 py-0.5 rounded ml-2">x{device.count}</span>}
-                </div>
-                <DeviceStatusBadge status={device.status} />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {device.imei && (
-                  <div className="flex items-center">
-                    <span className="text-gray-500 mr-1">IMEI:</span>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="font-mono bg-gray-100 px-1 rounded truncate">{device.imei}</span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="font-mono">{device.imei}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                )}
-                
-                {device.batteryHealth && (
-                  <div className="flex items-center">
-                    <Battery className="h-3 w-3 mr-1 text-gray-500" />
-                    <span className="text-gray-700">{device.batteryHealth}</span>
-                  </div>
-                )}
-                
-                {device.checkInNumber && (
-                  <div className="flex items-center">
-                    <CheckCircle className="h-3 w-3 mr-1 text-gray-500" />
-                    <span className="text-gray-700">Check-in: {device.checkInNumber}</span>
-                  </div>
-                )}
-                
-                {device.location && (
-                  <div className="flex items-center">
-                    <MapPin className="h-3 w-3 mr-1 text-gray-500" />
-                    <span className="text-gray-700">{device.location}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+      <DeviceDetailsDrawer 
+        isOpen={isDrawerOpen} 
+        onClose={() => setIsDrawerOpen(false)}
+        devices={devices}
+      />
+    </>
   );
 };
 
